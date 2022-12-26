@@ -1,26 +1,15 @@
 from builtins import *
-
-builtglob = list(globals().keys())
-
-
-
 from binascii import hexlify
 from tokenize import tokenize, untokenize, TokenInfo
 from io import BytesIO
 from re import findall
-
 from random import choice, shuffle, randint
-
 from zlib import compress
 
-
-
-
+builtglob = list(globals().keys())
 
 class Hyperion:
-
     def __init__(self, content: str, clean = True, obfcontent = True, renlibs = True, renvars = True, addbuiltins = True, randlines = True, shell = True, camouflate = True, safemode = True, ultrasafemode = False) -> None:
-
         r"""
         Use Safe Modes only if you have errors with your obfuscated script [!!!]
         ## Settings
@@ -126,10 +115,6 @@ class Hyperion:
         else:
             self.content = ';'.join(self.content)
 
-
-
-    # Layers
-
     def AddBuiltins(self):
         imp = "from builtins import " + ','.join(f'{var}' for var in builtglob if not var.startswith('__') and var not in ('None', 'True', 'False') and f'{var}(' in self.content) + '\n'
         if imp == "from builtins import \n":
@@ -137,7 +122,6 @@ class Hyperion:
         self.content = imp + self.content
 
     def CreateVars(self):
-
         self.globals = self._randvar()
         self.locals = self._randvar()
         self.vars = self._randvar()
@@ -163,7 +147,6 @@ class Hyperion:
         _imports = self._gather_imports()
         if _imports == False:
             print(stage("Star import detected! Skipping the renaming of imported libraries and variables.", '!!!', Col.light_red, Col.light_red))
-            # raise self.StarImport()
             return False
         imports = []
         for imp in _imports:
@@ -184,8 +167,6 @@ class Hyperion:
         f = BytesIO(self.content.encode('utf-8'))
         self.tokens = list(tokenize(f.readline))
 
-        # input('\n'.join(str(tok) for tok in self.tokens))
-
         strings = {}
 
         ntokens = []
@@ -194,7 +175,6 @@ class Hyperion:
 
         for token in self.tokens:
             string, type = token.string, token.type
-
             
             if type == 1:
                 if (
@@ -218,16 +198,12 @@ class Hyperion:
                     passed.append(string)
             
             ntokens.append(TokenInfo(type, string, token.start, token.end, token.line))
-            
-
 
         self.content = untokenize(ntokens).decode('utf-8')
  
     def ObfContent(self):
         f = BytesIO(self.content.encode('utf-8'))
         self.tokens = list(tokenize(f.readline))
-
-        # input('\n'.join(str(tok) for tok in self.tokens))
 
         ntokens = []
 
@@ -259,9 +235,8 @@ class Hyperion:
         self.content = untokenize(ntokens).decode('utf-8')
 
     def CleanCode(self):
-            
-            self.RemoveComments()
-            self.CompressCode()
+        self.RemoveComments()
+        self.CompressCode()
 
     def RandLines(self):
         content = []
@@ -297,7 +272,6 @@ class Hyperion:
         self.content = self.local_import + '\n' + '\n'.join(gd_vars) + '\n' + '\n'.join(self.impcontent) + '\n' + exec_var + '\n' + '\n'.join(add_imports) + '\n' + '\n'.join(self.impcontent2) + '\n' + '\n'.join(self.strings) + '\n' + self.content
 
     def Compress(self):
-
         eval_var = f"globals()['{self._hex('eval')}']"
         str_var = f"globals()['{self._hex('str')}']"
         compile_var = f"globals()['{self._hex('compile')}']"
@@ -439,21 +413,11 @@ if __name__ == '__main__':
         elif {self._rand_bool(False)}:
             {self._rand_pass(line = False)}
 """.strip()
-        
-
-
-
-    # Exceptions
 
     class StarImport(Exception):
         def __init__(self):
             super().__init__("Star Import is forbidden, please update your script")
 
-
-
-    # All
-
-    
     def _verify_lin(self, content):
         return all(lin.strip() not in ['(','[','{','}',']',')'] for lin in content.splitlines())
 
@@ -483,7 +447,6 @@ if __name__ == '__main__':
             self.locals,
             self.vars
         ))
-
     
     def _protect(self, var, basic=False, r=0, char=1):
         char = "'" if char == 1 else '"'
@@ -502,17 +465,11 @@ if __name__ == '__main__':
         protected = self._protect(lib, r=2, basic=True)
         return f"{self.getattr}({self.__import__}({protected}),{self.dir}({self.__import__}({protected}))[{self.dir}({self.__import__}({protected})).index({self._protect(var, r=2, basic=True)})])"
 
-    
-    # CreateVars
-
     @property
     def _to_import(self):
-
         self.dir = self._randvar()
         self.getattr = self._randvar()
-
         self.exec = self._randvar()
-        
         self.eval = self._randvar()
         self.compile = self._randvar()
         self.join = self._randvar()
@@ -523,7 +480,6 @@ if __name__ == '__main__':
         self.float = self._randvar()
         self.unhexlify = self._randvar()
         
-
         imports = {
             self._protect_built('eval'): self.eval,
             self._protect_built('compile'): self.compile,
@@ -542,9 +498,6 @@ if __name__ == '__main__':
     def utf8(self):
         return self._protect('utf8', basic=True, r=2)
 
-
-    # RenameImports
-
     def _gather_imports(self):
         imports = [lin for lin in self.content.splitlines() if self._is_valid(lin)]
         for imp in imports:
@@ -554,8 +507,6 @@ if __name__ == '__main__':
 
     def _is_valid(self, lin: str):
         return ('import' in lin and '"' not in lin and "'" not in lin and ';' not in lin and '.' not in lin and '#' not in lin)
-
-    # RenameVars
 
     def _is_not_arg(self, string):
         if not self.safemode:
@@ -569,13 +520,11 @@ if __name__ == '__main__':
         return all(string.lower() not in func for func in funcs)
 
     def _check_fstring(self, string):
-        
         fstrings = findall(r'{[' + self._fstring_legal_chars + r']*}', self.content.lower())
         return all(string.lower() not in fstring for fstring in fstrings)
 
 
     def _is_not_library(self, token: str):
-
         while True:
             if self.tokens[self.tokens.index(token)-1].string == '.':
                 token = self.tokens[self.tokens.index(token)-2]
@@ -602,9 +551,6 @@ if __name__ == '__main__':
     @property
     def _fstring_legal_chars(self):
         return """abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUV_WXYZ0123456789/*-+. ,/():"'"""
-
-
-    # ObfContent
 
     def _obf_bool(self, string):
         if string == 'False':
@@ -653,17 +599,13 @@ if __name__ == '__main__':
             return f"{self.eval}({self._protect(f'{self._underscore_int(x)}-(-{self._underscore_int(rnum)})')})"
     
     def _adv_str(self, string):
-    
         var = f"""{self.eval}({self._protect(string, r=1)})"""
         if (string.replace('b','').replace('u','').replace('r','').replace('f','')[0] == '"' and string.split('"')[0].count('f') != 0) or (string.replace('b','').replace('u','').replace('r','').replace('f','')[0] == "'" and string.split("'")[0].count('f') != 0):
             return var, False
         return var, True
 
     def _underscore_int(self, string):
-        # return string
         return '_'.join(str(string)).replace('-_','-').replace('+_','+')
-
-    # CleanCode
 
     def RemoveComments(self):
         self.content = "".join(lin + '\n' for lin in self.content.splitlines() if lin.strip() and not lin.strip().startswith('#'))
