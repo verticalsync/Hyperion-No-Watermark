@@ -8,7 +8,7 @@ from zlib import compress
 
 builtglob = list(globals().keys())
 
-class Hyperion:
+class Obfuscator:
     def __init__(self, content: str, clean = True, obfcontent = True, renlibs = True, renvars = True, addbuiltins = True, randlines = True, shell = True, camouflate = True, safemode = True, ultrasafemode = False) -> None:
         r"""
         Use Safe Modes only if you have errors with your obfuscated script [!!!]
@@ -49,8 +49,6 @@ class Hyperion:
         
         if ultrasafemode == True:
             randlines, shell, renlibs, renvars = False, False, False, False
-
-        p("Starting Hyperization.")
 
         self.content = "exec('')\n\n" + content
 
@@ -858,8 +856,8 @@ def main():
     print('\n')
 
     now = time()
-    Hype = Hyperion(content=script, renvars = renvars, renlibs = renlibs, randlines = randlines, shell = shell)
-    script = Hype.content
+    obfuscator = Obfuscator(content=script, renvars = renvars, renlibs = renlibs, randlines = randlines, shell = shell)
+    script = obfuscator.content
     now = round(time() - now, 2)
 
     with open(f'obf-{filename}', mode='w') as f:
